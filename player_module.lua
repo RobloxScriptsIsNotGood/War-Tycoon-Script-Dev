@@ -2,7 +2,7 @@
 local PlayerModule = {}
 
 -- Services
-local Players = game:GetServices("Players")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 -- Local Player
@@ -24,20 +24,6 @@ player.CharacterAdded:Connect(function(newChar)
     humanoid = character:WaitForChild("Humanoid")
 end)
 
--- Apply WalkSpeed
-local function ApplyWalkSpeed()
-    if Settings.WalkSpeedEnabled and humanoid then
-        humanoid.WalkSpeed = Settings.WalkSpeedValue
-    end
-end
-
--- Apply JumpHeight
-local function ApplyJumpHeight()
-    if Settings.JumpHeightEnabled and humanoid then
-        humanoid.JumpHeight = Settings.JumpHeightValue
-    end
-end
-
 -- Continuous update loop
 RunService.Heartbeat:Connect(function()
     if humanoid then
@@ -51,52 +37,103 @@ RunService.Heartbeat:Connect(function()
 end)
 
 -- Initialize UI
-function PlayerModule:Initialize(venyx, playerPage)
-    local speedSection = playerPage:addSection("Speed")
+function PlayerModule:Initialize(Rayfield, PlayerTab)
+    -- Create Speed Section
+    local SpeedSection = PlayerTab:CreateSection("Speed")
     
     -- WalkSpeed Toggle
-    speedSection:addToggle("Enable WalkSpeed", nil, function(value)
-        Settings.WalkSpeedEnabled = value
-        if value then
-            ApplyWalkSpeed()
-            venyx:Notify("WalkSpeed", "Enabled")
-        else
-            if humanoid then
-                humanoid.WalkSpeed = 16 -- Reset to default
+    local WalkSpeedToggle = PlayerTab:CreateToggle({
+        Name = "Enable WalkSpeed",
+        CurrentValue = false,
+        Flag = "WalkSpeedToggle",
+        Callback = function(Value)
+            Settings.WalkSpeedEnabled = Value
+            if Value then
+                if humanoid then
+                    humanoid.WalkSpeed = Settings.WalkSpeedValue
+                end
+                Rayfield:Notify({
+                    Title = "WalkSpeed",
+                    Content = "Enabled",
+                    Duration = 3,
+                    Image = "zap"
+                })
+            else
+                if humanoid then
+                    humanoid.WalkSpeed = 16
+                end
+                Rayfield:Notify({
+                    Title = "WalkSpeed",
+                    Content = "Disabled",
+                    Duration = 3,
+                    Image = "zap-off"
+                })
             end
-            venyx:Notify("WalkSpeed", "Disabled")
-        end
-    end)
+        end,
+    })
     
     -- WalkSpeed Slider
-    speedSection:addSlider("WalkSpeed Value", 16, 0, 100, function(value)
-        Settings.WalkSpeedValue = value
-        if Settings.WalkSpeedEnabled then
-            ApplyWalkSpeed()
-        end
-    end)
+    local WalkSpeedSlider = PlayerTab:CreateSlider({
+        Name = "WalkSpeed Value",
+        Range = {0, 100},
+        Increment = 1,
+        Suffix = "",
+        CurrentValue = 16,
+        Flag = "WalkSpeedSlider",
+        Callback = function(Value)
+            Settings.WalkSpeedValue = Value
+            if Settings.WalkSpeedEnabled and humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end,
+    })
     
     -- JumpHeight Toggle
-    speedSection:addToggle("Enable JumpHeight", nil, function(value)
-        Settings.JumpHeightEnabled = value
-        if value then
-            ApplyJumpHeight()
-            venyx:Notify("JumpHeight", "Enabled")
-        else
-            if humanoid then
-                humanoid.JumpHeight = 50 -- Reset to default
+    local JumpHeightToggle = PlayerTab:CreateToggle({
+        Name = "Enable JumpHeight",
+        CurrentValue = false,
+        Flag = "JumpHeightToggle",
+        Callback = function(Value)
+            Settings.JumpHeightEnabled = Value
+            if Value then
+                if humanoid then
+                    humanoid.JumpHeight = Settings.JumpHeightValue
+                end
+                Rayfield:Notify({
+                    Title = "JumpHeight",
+                    Content = "Enabled",
+                    Duration = 3,
+                    Image = "arrow-up"
+                })
+            else
+                if humanoid then
+                    humanoid.JumpHeight = 50
+                end
+                Rayfield:Notify({
+                    Title = "JumpHeight",
+                    Content = "Disabled",
+                    Duration = 3,
+                    Image = "arrow-down"
+                })
             end
-            venyx:Notify("JumpHeight", "Disabled")
-        end
-    end)
+        end,
+    })
     
     -- JumpHeight Slider
-    speedSection:addSlider("JumpHeight Value", 50, 0, 100, function(value)
-        Settings.JumpHeightValue = value
-        if Settings.JumpHeightEnabled then
-            ApplyJumpHeight()
-        end
-    end)
+    local JumpHeightSlider = PlayerTab:CreateSlider({
+        Name = "JumpHeight Value",
+        Range = {0, 100},
+        Increment = 1,
+        Suffix = "",
+        CurrentValue = 50,
+        Flag = "JumpHeightSlider",
+        Callback = function(Value)
+            Settings.JumpHeightValue = Value
+            if Settings.JumpHeightEnabled and humanoid then
+                humanoid.JumpHeight = Value
+            end
+        end,
+    })
 end
 
 return PlayerModule
